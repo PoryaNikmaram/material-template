@@ -34,16 +34,12 @@ import KpiCard from '@components/shared/KpiCard'
 import { formatFileSize, getFiles, filesQueryKeys } from '@/features/file-manager'
 import type { FileItem } from '@/features/file-manager'
 import { getUsers, usersQueryKeys } from '@/features/users'
-import type { UserStatus } from '@/features/users'
+import type { User } from '@/features/users'
 
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
 
-const statusMap: Record<UserStatus, { label: string; color: 'success' | 'warning' | 'default' }> = {
-  active: { label: 'فعال', color: 'success' },
-  pending: { label: 'در انتظار', color: 'warning' },
-  inactive: { label: 'غیرفعال', color: 'default' }
-}
+const dashboardUsersParams = { page: 1, pageSize: 5 } as const
 
 const activityFeedSeed = [
   {
@@ -108,9 +104,9 @@ const PreviewSkeleton = ({ rows = 5 }: { rows?: number }) => (
 const Dashboard = () => {
   const [liveIndex, setLiveIndex] = useState(0)
 
-  const { data: users = [], isLoading: usersLoading } = useQuery({
-    queryKey: usersQueryKeys.all,
-    queryFn: getUsers
+  const { data: usersResult, isLoading: usersLoading } = useQuery({
+    queryKey: usersQueryKeys.list(dashboardUsersParams),
+    queryFn: () => getUsers(dashboardUsersParams)
   })
 
   const { data: files = [], isLoading: filesLoading } = useQuery({
@@ -118,8 +114,10 @@ const Dashboard = () => {
     queryFn: getFiles
   })
 
-  const activeUsers = users.filter(u => u.status === 'active').length
-  const topUsers = users.slice(0, 5)
+  const users = usersResult?.items ?? []
+  const activeUsers = users.filter((user: User) => user.isActive).length
+  const topUsers = users
+  const totalUsers = usersResult?.totalCount ?? users.length
   const latestFiles = files.slice(0, 5)
 
   const kpis = useMemo(
@@ -127,7 +125,7 @@ const Dashboard = () => {
       {
         title: 'کاربران فعال',
         value: usersLoading ? '—' : String(activeUsers),
-        subtitle: `از ${users.length} کاربر ثبت‌شده`,
+        subtitle: `از ${totalUsers} کاربر ثبت‌شده`,
         trend: 12,
         trendLabel: 'نسبت به هفته قبل',
         icon: 'ri-group-line',
@@ -161,7 +159,7 @@ const Dashboard = () => {
         color: 'secondary' as const
       }
     ],
-    [activeUsers, users.length, files.length, usersLoading, filesLoading]
+    [activeUsers, totalUsers, files.length, usersLoading, filesLoading]
   )
 
   useEffect(() => {
@@ -246,34 +244,42 @@ const Dashboard = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {topUsers.map(user => (
-                        <TableRow key={user.id} hover sx={tableRowHoverSx}>
-                          <TableCell>
-                            <Box className='flex items-center gap-2'>
-                              <CustomAvatar src={user.avatarSrc} size={32}>
-                                {user.name.charAt(0)}
-                              </CustomAvatar>
-                              <Box>
-                                <Typography variant='body2' className='font-medium'>
-                                  {user.name}
-                                </Typography>
-                                <Typography variant='caption' color='text.secondary'>
-                                  {user.email}
-                                </Typography>
+                      {topUsers.map((user: User) => {
+                        const displayName =
+                          [user.firstName, user.lastName].filter(Boolean).join(' ') ||
+                          user.username ||
+                          user.email ||
+                          '—'
+
+                        const initial = (user.firstName || user.username || user.email || '?').charAt(0).toUpperCase()
+
+                        return (
+                          <TableRow key={user.id} hover sx={tableRowHoverSx}>
+                            <TableCell>
+                              <Box className='flex items-center gap-2'>
+                                <CustomAvatar size={32}>{initial}</CustomAvatar>
+                                <Box>
+                                  <Typography variant='body2' className='font-medium'>
+                                    {displayName}
+                                  </Typography>
+                                  <Typography variant='caption' color='text.secondary'>
+                                    {user.email ?? '—'}
+                                  </Typography>
+                                </Box>
                               </Box>
-                            </Box>
-                          </TableCell>
-                          <TableCell>{user.role}</TableCell>
-                          <TableCell>
-                            <Chip
-                              size='small'
-                              variant='tonal'
-                              label={statusMap[user.status].label}
-                              color={statusMap[user.status].color}
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                            </TableCell>
+                            <TableCell>{user.role ?? '—'}</TableCell>
+                            <TableCell>
+                              <Chip
+                                size='small'
+                                variant='tonal'
+                                label={user.isActive ? 'فعال' : 'غیرفعال'}
+                                color={user.isActive ? 'success' : 'default'}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })}
                     </TableBody>
                   </Table>
                 </TableContainer>

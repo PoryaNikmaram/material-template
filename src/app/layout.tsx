@@ -17,7 +17,7 @@ import RootProvider from '@/providers'
 import '@/app/globals.css'
 
 // Generated Icon CSS Imports
-import '@assets/iconify-icons/generated-icons.css'
+import 'remixicon/fonts/remixicon.css'
 
 const vazirmatn = Vazirmatn({
   subsets: ['arabic', 'latin'],

@@ -21,6 +21,12 @@ import Divider from '@mui/material/Divider'
 import MenuItem from '@mui/material/MenuItem'
 import Button from '@mui/material/Button'
 
+// Third-party Imports
+import { useQueryClient } from '@tanstack/react-query'
+
+// Auth Imports
+import { logoutSession, useCurrentUserQuery } from '@/core/auth'
+
 const BadgeContentSpan = styled('span')({
   width: 8,
   height: 8,
@@ -32,8 +38,14 @@ const BadgeContentSpan = styled('span')({
 
 const UserDropdown = () => {
   const [open, setOpen] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
   const anchorRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+  const queryClient = useQueryClient()
+  const { data: currentUser } = useCurrentUserQuery()
+
+  const displayName = currentUser?.name || currentUser?.username || 'کاربر'
+  const displayRole = currentUser?.role || 'کاربر سیستم'
 
   const handleDropdownOpen = () => {
     setOpen(prev => !prev)
@@ -51,6 +63,18 @@ const UserDropdown = () => {
     setOpen(false)
   }
 
+  const handleLogout = async (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
+    setIsLoggingOut(true)
+
+    try {
+      await logoutSession(queryClient)
+    } finally {
+      setIsLoggingOut(false)
+      setOpen(false)
+    }
+  }
+
   return (
     <>
       <Badge
@@ -61,7 +85,7 @@ const UserDropdown = () => {
         className='mis-2'
       >
         <Avatar
-          alt='علی رضایی'
+          alt={displayName}
           src='/images/avatars/1.png'
           onClick={handleDropdownOpen}
           className='cursor-pointer bs-[38px] is-[38px]'
@@ -86,12 +110,12 @@ const UserDropdown = () => {
               <ClickAwayListener onClickAway={e => handleDropdownClose(e as MouseEvent | TouchEvent)}>
                 <MenuList>
                   <div className='flex items-center plb-2 pli-4 gap-2' tabIndex={-1}>
-                    <Avatar alt='علی رضایی' src='/images/avatars/1.png' />
+                    <Avatar alt={displayName} src='/images/avatars/1.png' />
                     <div className='flex items-start flex-col'>
                       <Typography className='font-medium' color='text.primary'>
-                        علی رضایی
+                        {displayName}
                       </Typography>
-                      <Typography variant='caption'>مدیر سیستم</Typography>
+                      <Typography variant='caption'>{displayRole}</Typography>
                     </div>
                   </div>
                   <Divider className='mlb-1' />
@@ -113,11 +137,14 @@ const UserDropdown = () => {
                       variant='contained'
                       color='error'
                       size='small'
-                      endIcon={<i className='ri-logout-box-r-line' />}
-                      onClick={e => handleDropdownClose(e, '/login')}
+                      disabled={isLoggingOut}
+                      endIcon={
+                        <i className={isLoggingOut ? 'ri-loader-4-line animate-spin' : 'ri-logout-box-r-line'} />
+                      }
+                      onClick={handleLogout}
                       sx={{ '& .MuiButton-endIcon': { marginInlineStart: 1.5 } }}
                     >
-                      خروج
+                      {isLoggingOut ? 'در حال خروج...' : 'خروج'}
                     </Button>
                   </div>
                 </MenuList>

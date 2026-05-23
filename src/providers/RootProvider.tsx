@@ -9,6 +9,7 @@ import { SettingsProvider } from '@core/contexts/settingsContext'
 import ReactQueryProvider from './ReactQueryProvider'
 import ToastProvider from './ToastProvider'
 import ThemeProvider from './theme'
+import { AuthBootstrap } from '@/core/auth'
 
 // Util Imports
 import { getMode, getSettingsFromCookie } from '@core/utils/serverHelpers'
@@ -25,9 +26,11 @@ const RootProvider = ({ children, direction }: Props) => {
     <VerticalNavProvider>
       <SettingsProvider settingsCookie={settingsCookie} mode={mode}>
         <ReactQueryProvider>
-          <ThemeProvider direction={direction}>
-            <ToastProvider>{children}</ToastProvider>
-          </ThemeProvider>
+          <AuthBootstrap>
+            <ThemeProvider direction={direction}>
+              <ToastProvider>{children}</ToastProvider>
+            </ThemeProvider>
+          </AuthBootstrap>
         </ReactQueryProvider>
       </SettingsProvider>
     </VerticalNavProvider>
