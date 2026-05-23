@@ -4,13 +4,13 @@ A modern admin dashboard built on the [Materio Free MUI Next.js template](https:
 
 ## Tech stack
 
-| Layer | Tools |
-| --- | --- |
-| Framework | [Next.js 14](https://nextjs.org) (App Router) |
-| UI | [MUI 5](https://mui.com), [Tailwind CSS](https://tailwindcss.com), [Iconify](https://iconify.design) |
-| Language | [TypeScript](https://www.typescriptlang.org) |
-| Data | [TanStack Query](https://tanstack.com/query), [Axios](https://axios-http.com) |
-| Forms | [React Hook Form](https://react-hook-form.com), [Zod](https://zod.dev) |
+| Layer     | Tools                                                                                                |
+| --------- | ---------------------------------------------------------------------------------------------------- |
+| Framework | [Next.js 14](https://nextjs.org) (App Router)                                                        |
+| UI        | [MUI 5](https://mui.com), [Tailwind CSS](https://tailwindcss.com), [Iconify](https://iconify.design) |
+| Language  | [TypeScript](https://www.typescriptlang.org)                                                         |
+| Data      | [TanStack Query](https://tanstack.com/query), [Axios](https://axios-http.com)                        |
+| Forms     | [React Hook Form](https://react-hook-form.com), [Zod](https://zod.dev)                               |
 
 ## What's included
 
@@ -45,26 +45,26 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 Copy `.env.example` to `.env` and adjust as needed:
 
-| Variable | Description | Default |
-| --- | --- | --- |
-| `BASEPATH` | Optional URL prefix for deployment | _(empty)_ |
-| `NEXT_PUBLIC_APP_URL` | Public app URL | `http://localhost:3000` |
-| `NEXT_PUBLIC_API_URL` | Client-side API base path | `/api` |
-| `API_URL` | Server-side API base path | `/api` |
-| `NEXT_PUBLIC_USE_MOCK_API` | Use in-memory mock repositories | `true` |
+| Variable                   | Description                        | Default                 |
+| -------------------------- | ---------------------------------- | ----------------------- |
+| `BASEPATH`                 | Optional URL prefix for deployment | _(empty)_               |
+| `NEXT_PUBLIC_APP_URL`      | Public app URL                     | `http://localhost:3000` |
+| `NEXT_PUBLIC_API_URL`      | Client-side API base path          | `/api`                  |
+| `API_URL`                  | Server-side API base path          | `/api`                  |
+| `NEXT_PUBLIC_USE_MOCK_API` | Use in-memory mock repositories    | `true`                  |
 
 Set `NEXT_PUBLIC_USE_MOCK_API=false` when you connect a real backend. Repositories live under `src/features/*/api/`.
 
 ## Scripts
 
-| Command | Description |
-| --- | --- |
-| `npm run dev` | Start development server |
-| `npm run build` | Production build |
-| `npm run start` | Serve production build |
-| `npm run lint` | Run ESLint |
-| `npm run lint:fix` | Fix ESLint issues |
-| `npm run format` | Format `src/` with Prettier |
+| Command               | Description                   |
+| --------------------- | ----------------------------- |
+| `npm run dev`         | Start development server      |
+| `npm run build`       | Production build              |
+| `npm run start`       | Serve production build        |
+| `npm run lint`        | Run ESLint                    |
+| `npm run lint:fix`    | Fix ESLint issues             |
+| `npm run format`      | Format `src/` with Prettier   |
 | `npm run build:icons` | Bundle Iconify icons into CSS |
 
 ## Project structure
@@ -89,13 +89,13 @@ src/
 
 ## Routes
 
-| Path | Page |
-| --- | --- |
-| `/` | Dashboard |
-| `/users` | User management |
-| `/file-manager` | File manager |
-| `/login` | Sign in |
-| `/register` | Sign up |
+| Path               | Page              |
+| ------------------ | ----------------- |
+| `/`                | Dashboard         |
+| `/users`           | User management   |
+| `/file-manager`    | File manager      |
+| `/login`           | Sign in           |
+| `/register`        | Sign up           |
 | `/forgot-password` | Password recovery |
 
 ## Customization
@@ -113,13 +113,3 @@ npm run start
 ```
 
 Deploy like any standard Next.js app (Vercel, Docker, Node server, etc.). Set `BASEPATH` if the app is served from a subpath.
-
-## Documentation & license
-
-This project is based on **Materio Free MUI Next.js Admin Template** by [ThemeSelection](https://themeselection.com).
-
-- [Live demo](https://demos.themeselection.com/materio-mui-nextjs-admin-template-free/demo)
-- [Official docs](https://demos.themeselection.com/materio-mui-nextjs-admin-template/documentation)
-- [Pro version](https://themeselection.com/item/materio-mui-nextjs-admin-template)
-
-See the [repository license](https://github.com/themeselection/materio-mui-nextjs-admin-template-free/blob/main/LICENSE) for usage terms.
