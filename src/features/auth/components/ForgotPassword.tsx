@@ -12,7 +12,11 @@ import Button from '@mui/material/Button'
 
 // Third-party Imports
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation } from '@tanstack/react-query'
 import { Controller, useForm } from 'react-hook-form'
+
+// API Imports
+import { forgotPassword } from '@/features/auth/api'
 
 // Type Imports
 import type { Mode } from '@core/types'
@@ -48,12 +52,21 @@ const ForgotPassword = ({ mode }: { mode: Mode }) => {
     mode: 'onTouched'
   })
 
-  const onSubmit = async () => {
-    showToast({
-      message: 'لینک بازیابی رمز عبور به ایمیل شما ارسال شد',
-      severity: 'success'
-    })
+  const forgotPasswordMutation = useMutation({
+    mutationFn: forgotPassword,
+    onSuccess: () => {
+      showToast({
+        message: 'لینک بازیابی رمز عبور به ایمیل شما ارسال شد',
+        severity: 'success'
+      })
+    }
+  })
+
+  const onSubmit = async (values: ForgotPasswordFormValues) => {
+    await forgotPasswordMutation.mutateAsync({ email: values.email })
   }
+
+  const isPending = forgotPasswordMutation.isPending || isSubmitting
 
   return (
     <div className='flex flex-col justify-center items-center min-bs-[100dvh] relative p-6'>
@@ -67,12 +80,7 @@ const ForgotPassword = ({ mode }: { mode: Mode }) => {
             <Typography className='mbs-1'>
               ایمیل خود را وارد کنید تا دستورالعمل بازیابی رمز عبور برای شما ارسال شود
             </Typography>
-            <form
-              noValidate
-              autoComplete='off'
-              onSubmit={handleSubmit(onSubmit)}
-              className='flex flex-col gap-5'
-            >
+            <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-5'>
               <Controller
                 name='email'
                 control={control}
@@ -87,8 +95,8 @@ const ForgotPassword = ({ mode }: { mode: Mode }) => {
                   />
                 )}
               />
-              <Button fullWidth variant='contained' type='submit' disabled={isSubmitting}>
-                {isSubmitting ? 'در حال ارسال...' : 'ارسال لینک بازیابی'}
+              <Button fullWidth variant='contained' type='submit' disabled={isPending}>
+                {isPending ? 'در حال ارسال...' : 'ارسال لینک بازیابی'}
               </Button>
               <Typography className='flex justify-center items-center' color='primary'>
                 <Link href='/login' className='flex items-center'>

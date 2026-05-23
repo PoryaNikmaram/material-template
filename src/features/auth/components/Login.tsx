@@ -21,7 +21,12 @@ import Divider from '@mui/material/Divider'
 
 // Third-party Imports
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Controller, useForm } from 'react-hook-form'
+
+// API Imports
+import { login } from '@/features/auth/api'
+import { authDebug, completeLoginSession } from '@/core/auth'
 
 // Type Imports
 import type { Mode } from '@core/types'
@@ -46,6 +51,7 @@ const Login = ({ mode }: { mode: Mode }) => {
   const lightImg = '/images/pages/auth-v1-mask-light.png'
 
   const router = useRouter()
+  const queryClient = useQueryClient()
   const authBackground = useImageVariant(mode, lightImg, darkImg)
 
   const {
@@ -55,16 +61,32 @@ const Login = ({ mode }: { mode: Mode }) => {
   } = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
-      email: '',
+      nationalId: '',
       password: '',
       rememberMe: false
     },
     mode: 'onTouched'
   })
 
-  const onSubmit = async () => {
-    router.push('/')
+  const loginMutation = useMutation({
+    mutationFn: login,
+    onSuccess: async data => {
+      await completeLoginSession(data, queryClient)
+      router.push('/')
+    },
+    onError: error => {
+      authDebug.loginFailure({ message: error instanceof Error ? error.message : 'unknown' })
+    }
+  })
+
+  const onSubmit = async (values: SignInFormValues) => {
+    await loginMutation.mutateAsync({
+      nationalId: values.nationalId,
+      password: values.password
+    })
   }
+
+  const isPending = loginMutation.isPending || isSubmitting
 
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
 
@@ -80,21 +102,17 @@ const Login = ({ mode }: { mode: Mode }) => {
               <Typography variant='h4'>{`خوش آمدید به ${themeConfig.templateName}! 👋`}</Typography>
               <Typography className='mbs-1'>لطفاً وارد حساب کاربری خود شوید</Typography>
             </div>
-            <form
-              noValidate
-              autoComplete='off'
-              onSubmit={handleSubmit(onSubmit)}
-              className='flex flex-col gap-5'
-            >
+            <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-5'>
               <Controller
-                name='email'
+                name='nationalId'
                 control={control}
                 render={({ field, fieldState }) => (
                   <TextField
                     {...field}
                     autoFocus
                     fullWidth
-                    label='ایمیل'
+                    label='کد ملی'
+                    inputMode='numeric'
                     error={Boolean(fieldState.error)}
                     helperText={fieldState.error?.message}
                   />
@@ -146,8 +164,8 @@ const Login = ({ mode }: { mode: Mode }) => {
                   فراموشی رمز عبور؟
                 </Typography>
               </div>
-              <Button fullWidth variant='contained' type='submit' disabled={isSubmitting}>
-                {isSubmitting ? 'در حال ورود...' : 'ورود'}
+              <Button fullWidth variant='contained' type='submit' disabled={isPending}>
+                {isPending ? 'در حال ورود...' : 'ورود'}
               </Button>
               <div className='flex justify-center items-center flex-wrap gap-2'>
                 <Typography>حساب کاربری ندارید؟</Typography>

@@ -1,7 +1,11 @@
 import { z } from 'zod'
 
 export const signInSchema = z.object({
-  email: z.string().trim().min(1, 'ایمیل الزامی است').email('ایمیل معتبر نیست'),
+  nationalId: z
+    .string()
+    .trim()
+    .min(1, 'کد ملی الزامی است')
+    .regex(/^\d{10}$/, 'کد ملی باید ۱۰ رقم باشد'),
   password: z.string().min(6, 'رمز عبور باید حداقل ۶ کاراکتر باشد'),
   rememberMe: z.boolean().optional()
 })

@@ -21,7 +21,15 @@ import Divider from '@mui/material/Divider'
 
 // Third-party Imports
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation } from '@tanstack/react-query'
 import { Controller, useForm } from 'react-hook-form'
+
+// API Imports
+import { register } from '@/features/auth/api'
+
+// Hook Imports
+import { useImageVariant } from '@core/hooks/useImageVariant'
+import { useToast } from '@/providers/useToast'
 
 // Type Imports
 import type { Mode } from '@core/types'
@@ -33,9 +41,6 @@ import Logo from '@components/layout/shared/Logo'
 // Config Imports
 import themeConfig from '@configs/themeConfig'
 
-// Hook Imports
-import { useImageVariant } from '@core/hooks/useImageVariant'
-
 // Schema Imports
 import { registerSchema, type RegisterFormValues } from '@/features/auth/types/auth.schema'
 
@@ -46,6 +51,7 @@ const Register = ({ mode }: { mode: Mode }) => {
   const lightImg = '/images/pages/auth-v1-mask-light.png'
 
   const router = useRouter()
+  const { showToast } = useToast()
   const authBackground = useImageVariant(mode, lightImg, darkImg)
 
   const {
@@ -63,9 +69,23 @@ const Register = ({ mode }: { mode: Mode }) => {
     mode: 'onTouched'
   })
 
-  const onSubmit = async () => {
-    router.push('/login')
+  const registerMutation = useMutation({
+    mutationFn: register,
+    onSuccess: () => {
+      showToast({ message: 'ثبت‌نام با موفقیت انجام شد', severity: 'success' })
+      router.push('/login')
+    }
+  })
+
+  const onSubmit = async (values: RegisterFormValues) => {
+    await registerMutation.mutateAsync({
+      username: values.username,
+      email: values.email,
+      password: values.password
+    })
   }
+
+  const isPending = registerMutation.isPending || isSubmitting
 
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
 
@@ -79,12 +99,7 @@ const Register = ({ mode }: { mode: Mode }) => {
           <Typography variant='h4'>شروع ماجراجویی با {themeConfig.templateName} 🚀</Typography>
           <div className='flex flex-col gap-5'>
             <Typography className='mbs-1'>مدیریت سازمان خود را ساده و لذت‌بخش کنید!</Typography>
-            <form
-              noValidate
-              autoComplete='off'
-              onSubmit={handleSubmit(onSubmit)}
-              className='flex flex-col gap-5'
-            >
+            <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-5'>
               <Controller
                 name='username'
                 control={control}
@@ -147,10 +162,7 @@ const Register = ({ mode }: { mode: Mode }) => {
                   <>
                     <FormControlLabel
                       control={
-                        <Checkbox
-                          checked={Boolean(field.value)}
-                          onChange={(_, checked) => field.onChange(checked)}
-                        />
+                        <Checkbox checked={Boolean(field.value)} onChange={(_, checked) => field.onChange(checked)} />
                       }
                       label={
                         <>
@@ -170,8 +182,8 @@ const Register = ({ mode }: { mode: Mode }) => {
                   </>
                 )}
               />
-              <Button fullWidth variant='contained' type='submit' disabled={isSubmitting}>
-                {isSubmitting ? 'در حال ثبت‌نام...' : 'ثبت‌نام'}
+              <Button fullWidth variant='contained' type='submit' disabled={isPending}>
+                {isPending ? 'در حال ثبت‌نام...' : 'ثبت‌نام'}
               </Button>
               <div className='flex justify-center items-center flex-wrap gap-2'>
                 <Typography>قبلاً ثبت‌نام کرده‌اید؟</Typography>
