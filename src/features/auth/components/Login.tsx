@@ -8,16 +8,15 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 // MUI Imports
+import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
-import TextField from '@mui/material/TextField'
+import Checkbox from '@mui/material/Checkbox'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import IconButton from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
-import Checkbox from '@mui/material/Checkbox'
-import Button from '@mui/material/Button'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Divider from '@mui/material/Divider'
+import TextField from '@mui/material/TextField'
+import Typography from '@mui/material/Typography'
 
 // Third-party Imports
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -25,8 +24,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Controller, useForm } from 'react-hook-form'
 
 // API Imports
-import { login } from '@/features/auth/api'
 import { authDebug, completeLoginSession } from '@/core/auth'
+import { login } from '@/features/auth/api'
 
 // Type Imports
 import type { Mode } from '@core/types'
@@ -172,21 +171,6 @@ const Login = ({ mode }: { mode: Mode }) => {
                 <Typography component={Link} href='/register' color='primary'>
                   ثبت‌نام
                 </Typography>
-              </div>
-              <Divider className='gap-3'>یا</Divider>
-              <div className='flex justify-center items-center gap-2'>
-                <IconButton size='small' className='text-facebook'>
-                  <i className='ri-facebook-fill' />
-                </IconButton>
-                <IconButton size='small' className='text-twitter'>
-                  <i className='ri-twitter-fill' />
-                </IconButton>
-                <IconButton size='small' className='text-github'>
-                  <i className='ri-github-fill' />
-                </IconButton>
-                <IconButton size='small' className='text-googlePlus'>
-                  <i className='ri-google-fill' />
-                </IconButton>
               </div>
             </form>
           </div>
