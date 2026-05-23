@@ -1,34 +1,125 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Materio — TypeScript Admin Dashboard
 
-## Getting Started
+A modern admin dashboard built on the [Materio Free MUI Next.js template](https://themeselection.com/item/materio-free-mui-nextjs-admin-template), extended with a feature-based architecture, typed forms, and a mock-first API layer ready for a real backend.
 
-First, run the development server:
+## Tech stack
+
+| Layer | Tools |
+| --- | --- |
+| Framework | [Next.js 14](https://nextjs.org) (App Router) |
+| UI | [MUI 5](https://mui.com), [Tailwind CSS](https://tailwindcss.com), [Iconify](https://iconify.design) |
+| Language | [TypeScript](https://www.typescriptlang.org) |
+| Data | [TanStack Query](https://tanstack.com/query), [Axios](https://axios-http.com) |
+| Forms | [React Hook Form](https://react-hook-form.com), [Zod](https://zod.dev) |
+
+## What's included
+
+- **Dashboard** — overview with KPI widgets
+- **Users** — list and create flow with validation
+- **File manager** — browse and manage files (mock data)
+- **Auth pages** — login, register, forgot password
+- **Theming** — light / dark mode, RTL support, customizable primary color
+- **Mock API** — works out of the box; switch to HTTP when your backend is ready
+
+## Prerequisites
+
+- **Node.js** LTS (v18 or v20 recommended)
+- **npm**, **yarn**, or **pnpm**
+
+## Quick start
 
 ```bash
+# 1. Install dependencies (also builds Iconify icon bundle)
+npm install
+
+# 2. Copy environment variables
+cp .env.example .env
+
+# 3. Start the dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Copy `.env.example` to `.env` and adjust as needed:
 
-## Learn More
+| Variable | Description | Default |
+| --- | --- | --- |
+| `BASEPATH` | Optional URL prefix for deployment | _(empty)_ |
+| `NEXT_PUBLIC_APP_URL` | Public app URL | `http://localhost:3000` |
+| `NEXT_PUBLIC_API_URL` | Client-side API base path | `/api` |
+| `API_URL` | Server-side API base path | `/api` |
+| `NEXT_PUBLIC_USE_MOCK_API` | Use in-memory mock repositories | `true` |
 
-To learn more about Next.js, take a look at the following resources:
+Set `NEXT_PUBLIC_USE_MOCK_API=false` when you connect a real backend. Repositories live under `src/features/*/api/`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start development server |
+| `npm run build` | Production build |
+| `npm run start` | Serve production build |
+| `npm run lint` | Run ESLint |
+| `npm run lint:fix` | Fix ESLint issues |
+| `npm run format` | Format `src/` with Prettier |
+| `npm run build:icons` | Bundle Iconify icons into CSS |
 
-## Deploy on Vercel
+## Project structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+src/
+├── app/                    # Next.js App Router (routes & layouts)
+│   ├── (auth)/             # Login, register, forgot password
+│   └── (dashboard)/        # Dashboard, users, file manager
+├── components/             # Shared UI (layout, primitives)
+├── core/                   # HTTP client, theme, toast, React Query
+├── features/               # Domain modules (auth, users, file-manager)
+│   └── {feature}/
+│       ├── api/            # API layer + mock/repository implementations
+│       ├── components/     # Feature-specific UI
+│       └── types/          # Types & Zod schemas
+├── providers/              # App-wide React providers
+└── configs/                # Theme and layout configuration
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+**Convention:** put reusable UI in `src/components/`, and anything tied to a single domain in `src/features/{name}/`.
+
+## Routes
+
+| Path | Page |
+| --- | --- |
+| `/` | Dashboard |
+| `/users` | User management |
+| `/file-manager` | File manager |
+| `/login` | Sign in |
+| `/register` | Sign up |
+| `/forgot-password` | Password recovery |
+
+## Customization
+
+- **App name & theme** — `src/configs/themeConfig.ts`
+- **Primary color** — `src/configs/primaryColorConfig.ts`
+- **Navigation** — `src/components/layout/vertical/VerticalMenu.tsx`
+- **New feature** — add a folder under `src/features/`, wire a page in `src/app/(dashboard)/`, and register a menu item
+
+## Production build
+
+```bash
+npm run build
+npm run start
+```
+
+Deploy like any standard Next.js app (Vercel, Docker, Node server, etc.). Set `BASEPATH` if the app is served from a subpath.
+
+## Documentation & license
+
+This project is based on **Materio Free MUI Next.js Admin Template** by [ThemeSelection](https://themeselection.com).
+
+- [Live demo](https://demos.themeselection.com/materio-mui-nextjs-admin-template-free/demo)
+- [Official docs](https://demos.themeselection.com/materio-mui-nextjs-admin-template/documentation)
+- [Pro version](https://themeselection.com/item/materio-mui-nextjs-admin-template)
+
+See the [repository license](https://github.com/themeselection/materio-mui-nextjs-admin-template-free/blob/main/LICENSE) for usage terms.
