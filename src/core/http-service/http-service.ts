@@ -1,10 +1,23 @@
 import type { AxiosRequestConfig, AxiosResponse } from 'axios'
 
 import { axiosInstance } from './axios-instance'
+import { createNetworkError, throwApiError } from './errors'
 import type { ApiBaseConfig, ApiEnvelope } from './types'
+
+const assertJsonResponse = (payload: unknown): void => {
+  if (typeof payload === 'string' && payload.trimStart().startsWith('<!DOCTYPE')) {
+    throwApiError(
+      createNetworkError(
+        'API returned HTML instead of JSON. Set NEXT_PUBLIC_API_URL in .env to your backend URL and restart the dev server.'
+      )
+    )
+  }
+}
 
 const unwrapResponse = <T>(response: AxiosResponse<ApiEnvelope<T> | T>): T => {
   const payload = response.data
+
+  assertJsonResponse(payload)
 
   if (payload !== null && typeof payload === 'object' && 'data' in payload) {
     return (payload as ApiEnvelope<T>).data
@@ -48,6 +61,19 @@ export const updateData = async <TModel, TResult>(
   return apiBase<TResult>({
     ...config,
     method: 'PATCH',
+    url,
+    data: model
+  })
+}
+
+export const putData = async <TModel, TResult>(
+  url: string,
+  model: TModel,
+  config?: AxiosRequestConfig
+): Promise<TResult> => {
+  return apiBase<TResult>({
+    ...config,
+    method: 'PUT',
     url,
     data: model
   })

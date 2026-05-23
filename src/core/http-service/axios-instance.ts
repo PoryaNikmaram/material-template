@@ -1,5 +1,9 @@
 import { create, type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 
+import { authDebug } from '@/core/auth/debug/auth.debug'
+import { getAccessToken } from '@/core/auth/storage/auth.storage'
+
+import './axios-config.types'
 import { resolveHttpError } from './errors/resolveHttpError'
 import type { ApiErrorPayload } from './errors/errorTypes'
 
@@ -18,13 +22,18 @@ export const axiosInstance = create({
 
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    if (typeof window !== 'undefined') {
-      const accessToken = window.localStorage.getItem('accessToken')
+    const accessToken = getAccessToken()
 
-      if (accessToken) {
-        config.headers.Authorization = `Bearer ${accessToken}`
-      }
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`
     }
+
+    authDebug.axiosRequest({
+      url: config.url,
+      method: config.method,
+      skipAuthRefresh: Boolean(config._skipAuthRefresh),
+      retry: Boolean(config._retry)
+    })
 
     return config
   },
@@ -33,7 +42,43 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   response => response,
-  (error: AxiosError<ApiErrorPayload>) => Promise.reject(resolveHttpError(error))
+  async (error: AxiosError<ApiErrorPayload>) => {
+    const originalRequest = error.config
+
+    if (error.response?.status === 403 && originalRequest) {
+      authDebug.axios403SkipRefresh({
+        url: originalRequest.url,
+        skipAuthRefresh: Boolean(originalRequest._skipAuthRefresh)
+      })
+    }
+
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._skipAuthRefresh &&
+      !originalRequest._retry
+    ) {
+      authDebug.axios401Refresh({ url: originalRequest.url })
+      originalRequest._retry = true
+
+      const { refreshAuthTokens } = await import('@/core/auth/session/auth.refresh')
+      const refreshed = await refreshAuthTokens()
+
+      if (refreshed) {
+        const accessToken = getAccessToken()
+
+        if (accessToken) {
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`
+        }
+
+        authDebug.axiosRetry({ url: originalRequest.url })
+
+        return axiosInstance(originalRequest)
+      }
+    }
+
+    return Promise.reject(resolveHttpError(error))
+  }
 )
 
 export default axiosInstance

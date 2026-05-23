@@ -45,6 +45,10 @@ export const resolveHttpError = (error: AxiosError<ApiErrorPayload>): ApiError =
     return createBadRequestError(extractMessage(payload, 'درخواست نامعتبر است.'))
   }
 
+  if (statusCode === 401) {
+    return createUnauthorizedError(extractMessage(payload, 'لطفاً وارد حساب کاربری خود شوید.'))
+  }
+
   if (statusCode === 403) {
     return createUnauthorizedError(extractMessage(payload, 'دسترسی به این عملیات مجاز نیست.'))
   }
